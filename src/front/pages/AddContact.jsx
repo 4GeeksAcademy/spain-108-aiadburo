@@ -26,7 +26,7 @@ export const AddContact = () => {
             } else {
                 await addContact({ ...form, agenda_slug: "aiadburo" });
             }
-            navigate("/");
+            navigate("/contact"); // ✅ Redirige correctamente
         } catch (error) {
             console.error("Error al guardar contacto:", error);
             alert("Hubo un error al guardar el contacto.");
