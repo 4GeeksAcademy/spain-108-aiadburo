@@ -10,7 +10,7 @@ const ContactCard = ({ contact, onDelete }) => {
             <p>Address: {contact.address}</p>
             <div>
                 <Link to={`/edit/${contact.id}`} className="btn btn-sm btn-warning me-2">Editar</Link>
-                <button onClick={() => onDelete(contact.id)} className="btn btn-sm btn-danger">Eliminar</button>
+                <button onClick={() => onDelete(contact.id, contact.name)} className="btn btn-sm btn-danger">Eliminar</button>
             </div>
         </div>
     );

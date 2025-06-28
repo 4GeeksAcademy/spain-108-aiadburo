@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { addContact, fetchContacts, updateContact } from "../services/contacts";
+import { addContact, getContact, updateContact } from "../services/contacts";
+import useGlobalReducer from "../hooks/useGlobalReducer";
 
 export const AddContact = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { store, dispatch } = useGlobalReducer();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -17,27 +20,33 @@ export const AddContact = () => {
   useEffect(() => {
     if (id) {
       setLoading(true);
-      fetchContacts()
-        .then((data) => {
-          const contact = data.contacts.find((c) => String(c.id) === id);
-          if (!contact) {
-            setError("Contacto no encontrado");
-          } else {
+      const contact = store.contacts.find(c => String(c.id) === id);
+      if (contact) {
+        setForm({
+          name: contact.name || "",
+          email: contact.email || "",
+          phone: contact.phone || "",
+          address: contact.address || "",
+        });
+        setLoading(false);
+      } else {
+        getContact(id)
+          .then((contact) => {
             setForm({
               name: contact.name || "",
               email: contact.email || "",
               phone: contact.phone || "",
               address: contact.address || "",
             });
-          }
-          setLoading(false);
-        })
-        .catch(() => {
-          setError("Error al cargar contactos");
-          setLoading(false);
-        });
+            setLoading(false);
+          })
+          .catch(() => {
+            setError("Contacto no encontrado");
+            setLoading(false);
+          });
+      }
     }
-  }, [id]);
+  }, [id, store.contacts]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -47,12 +56,14 @@ export const AddContact = () => {
     e.preventDefault();
     try {
       if (id) {
-        await updateContact(id, form);
+        const updated = await updateContact(id, form);
+        dispatch({ type: "update_contact", payload: updated });
       } else {
-        await addContact({ ...form, agenda_slug: "aiadburo" });
+        const added = await addContact({ ...form, agenda_slug: "aiadburo" });
+        dispatch({ type: "add_contact", payload: added });
       }
       navigate("/contact");
-    } catch (error) {
+    } catch {
       alert("Hubo un error al guardar el contacto.");
     }
   };

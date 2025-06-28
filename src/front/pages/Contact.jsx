@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { fetchContacts, deleteContact } from "../services/contacts";
+import { deleteContact, fetchContacts } from "../services/contacts";
 import ContactCard from "../components/ContactCard";
 import { useNavigate } from "react-router-dom";
+import useGlobalReducer from "../hooks/useGlobalReducer";
 
 const Contact = () => {
-  const [contacts, setContacts] = useState([]);
+  const { store, dispatch } = useGlobalReducer();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Contact = () => {
       setLoading(true);
       setError(null);
       const data = await fetchContacts();
-      setContacts(data.contacts || []);
+      dispatch({ type: "set_contacts", payload: data.contacts || [] });
     } catch (err) {
       setError(err.message || "Error al cargar contactos");
     } finally {
@@ -26,7 +27,7 @@ const Contact = () => {
     if (window.confirm(`¿Está seguro que quiere eliminar a ${name}?`)) {
       try {
         await deleteContact(id);
-        await loadContacts();
+        dispatch({ type: "delete_contact", payload: id });
       } catch (err) {
         setError(err.message);
       }
@@ -59,25 +60,24 @@ const Contact = () => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Contactos</h1>
-        <button 
-          onClick={() => navigate("/add")} 
+        <button
+          onClick={() => navigate("/add")}
           className="btn btn-primary"
         >
           Agregar Contacto
         </button>
       </div>
 
-      {contacts.length === 0 ? (
+      {store.contacts.length === 0 ? (
         <div className="alert alert-info">
           No hay contactos.
         </div>
       ) : (
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          {contacts.map((contact) => (
+          {store.contacts.map((contact) => (
             <div key={contact.id} className="col">
               <ContactCard
                 contact={contact}
-                onEdit={() => navigate(`/edit/${contact.id}`)}
                 onDelete={() => handleDelete(contact.id, contact.name)}
               />
             </div>
