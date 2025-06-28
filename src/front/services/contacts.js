@@ -1,7 +1,25 @@
 const API_BASE = "https://playground.4geeks.com/contact";
 const AGENDA_SLUG = "aiadburo";
 
+export const createAgendaIfNotExists = async () => {
+  try {
+    const testRes = await fetch(`${API_BASE}/agendas/${AGENDA_SLUG}`);
+    if (testRes.status === 404) {
+      const createRes = await fetch(`${API_BASE}/agendas/${AGENDA_SLUG}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      if (!createRes.ok) throw new Error("Failed to create agenda");
+      return await createRes.json();
+    }
+    return await testRes.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const fetchContacts = async () => {
+  await createAgendaIfNotExists();
   const res = await fetch(`${API_BASE}/agendas/${AGENDA_SLUG}/contacts`);
   if (!res.ok) throw new Error("Failed to fetch contacts");
   return await res.json();
@@ -15,8 +33,7 @@ export const addContact = async (contact) => {
   });
   if (!res.ok) {
     const errorData = await res.json();
-    console.error("Error adding contact:", errorData);
-    throw new Error("Failed to add contact");
+    throw new Error(errorData.message || "Failed to add contact");
   }
   return await res.json();
 };
