@@ -21,7 +21,7 @@ def users():
     response_body = {}
 
     if request.method == 'GET':
-        response_body['message'] = 'Respuesta del GET'
+        response_body['message'] = 'Lista de usuarios'
         rows = db.session.execute(db.select(Users)).scalars()
         response_body['results'] = [row.serialize() for row in rows]
         return response_body, 200
@@ -39,7 +39,7 @@ def users():
         db.session.add(user)
         db.session.commit()
         response_body['results'] = user.serialize()
-        response_body['message'] = 'Respuesta del POST de Users'
+        response_body['message'] = 'Usuario creado.'
         return response_body, 201
 
 @api.route('/users/<int:id>', methods=['GET', 'PUT', 'DELETE'])
