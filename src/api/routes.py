@@ -4,7 +4,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from api.models import db, Users, Followers
+from api.models import db, Users, Followers, Posts, Comments, Media, Characters, CharacterFavorites, Planets, PlanetFavorites
 
 
 api = Blueprint('api', __name__)
